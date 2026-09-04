@@ -1,0 +1,135 @@
+{
+  "version": "1.0.0",
+  "domain": "booking",
+  "notes": [
+    "Ground truth lives in `expected` and is compared as a SUBSET: a fixture asserts only",
+    "the fields the interruption was meant to change, so preserved fields cannot false-fail.",
+    "interrupt_phase=speaking -> user barges into audible Rime speech (stale audio is the risk).",
+    "interrupt_phase=tool     -> user changes intent while a slow tool is in flight (stale RESULT is the risk).",
+    "Latencies here are scenario inputs. See results/*.json 'assumptions' for what is modelled vs measured.",
+    "naive_expected=defect -> the control arm MUST reproduce the stale-output bug or the fixture is not discriminating; naive_expected=clean -> both arms must stay clean (false-positive guard)."
+  ],
+  "cases": [
+    {
+      "id": "booking_01",
+      "title": "parameter + time correction mid-speech (brief \u00a710 example)",
+      "initial": "Book a table for two tomorrow at 8 PM",
+      "interrupt": "Actually make it four people at 9",
+      "expected": "4 people at 9 PM",
+      "interrupt_phase": "speaking",
+      "initial_tool_delay_ms": 1200,
+      "patch_tool_delay_ms": 350,
+      "tags": [
+        "parameter_correction",
+        "time_correction"
+      ],
+      "naive_expected": "defect"
+    },
+    {
+      "id": "flight_01",
+      "title": "destination correction mid-speech (brief \u00a74 user flow)",
+      "initial": "Find me a flight from Ahmedabad to Delhi tomorrow evening",
+      "interrupt": "Actually, Mumbai instead of Delhi",
+      "expected": "from Ahmedabad to Mumbai",
+      "interrupt_phase": "speaking",
+      "initial_tool_delay_ms": 2400,
+      "patch_tool_delay_ms": 350,
+      "tags": [
+        "destination_correction",
+        "preserve_origin"
+      ],
+      "naive_expected": "defect"
+    },
+    {
+      "id": "late_result_01",
+      "title": "late old tool result must not clobber the new request",
+      "initial": "Book a table for two tomorrow at 8 PM",
+      "interrupt": "Actually make it four people",
+      "expected": "4 people",
+      "interrupt_phase": "tool",
+      "interrupt_after_ms": 600,
+      "initial_tool_delay_ms": 2600,
+      "patch_tool_delay_ms": 350,
+      "tags": [
+        "late_old_tool_result",
+        "state_clobber_attempt"
+      ],
+      "naive_expected": "defect"
+    },
+    {
+      "id": "mid_sentence_01",
+      "title": "mid-sentence barge-in with no replacement request",
+      "initial": "Book a table for six tomorrow at 1 PM",
+      "expected": "6 people at 1 PM",
+      "interrupt_phase": "speaking",
+      "initial_tool_delay_ms": 900,
+      "interrupt_after_words": 1,
+      "tags": [
+        "mid_sentence_interruption",
+        "no_superseding_request"
+      ],
+      "naive_expected": "defect"
+    },
+    {
+      "id": "double_interrupt_01",
+      "title": "double interruption A -> B -> C, two races at once",
+      "initial": "Book a table for two tomorrow at 8 PM",
+      "interrupt": "Actually make it four people",
+      "interrupt2": "and at 9 PM instead of 8",
+      "expected": "4 people at 9 PM",
+      "interrupt_phase": "tool",
+      "interrupt_after_ms": 500,
+      "initial_tool_delay_ms": 3000,
+      "patch_tool_delay_ms": 350,
+      "tags": [
+        "double_interruption",
+        "late_old_tool_result"
+      ],
+      "naive_expected": "defect"
+    },
+    {
+      "id": "cancel_01",
+      "title": "explicit cancellation supersedes the running request",
+      "initial": "Book a table for two tomorrow at 8 PM",
+      "interrupt": "Actually forget it",
+      "expected": "forget it",
+      "interrupt_phase": "speaking",
+      "initial_tool_delay_ms": 1200,
+      "patch_tool_delay_ms": 200,
+      "tags": [
+        "cancellation"
+      ],
+      "naive_expected": "defect"
+    },
+    {
+      "id": "cancel_during_tool_01",
+      "title": "cancellation while the slow tool runs",
+      "initial": "Find me a flight from Ahmedabad to Delhi tomorrow evening",
+      "interrupt": "Never mind, cancel that",
+      "expected": "cancel",
+      "interrupt_phase": "tool",
+      "interrupt_after_ms": 700,
+      "initial_tool_delay_ms": 2200,
+      "patch_tool_delay_ms": 200,
+      "tags": [
+        "cancellation",
+        "late_old_tool_result"
+      ],
+      "naive_expected": "defect"
+    },
+    {
+      "id": "false_speech_01",
+      "title": "background speech must NOT invalidate the live request",
+      "initial": "Book a table for four tomorrow at 7 PM",
+      "expected": "4 people at 7 PM",
+      "interrupt_phase": "speaking",
+      "interrupt_source": "false_speech",
+      "interrupt_after_ms": 1500,
+      "initial_tool_delay_ms": 1200,
+      "tags": [
+        "false_or_background_speech"
+      ],
+      "naive_expected": "clean"
+    }
+  ]
+}

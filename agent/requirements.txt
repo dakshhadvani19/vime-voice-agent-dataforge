@@ -1,0 +1,7 @@
+# Deliberately empty.
+#
+# The fencing kernel (events/state_manager/interruption/lab/metrics/tools/config),
+# the tests and the deterministic evaluator run on the Python 3.11 standard library only,
+# so `pytest` and `run_tests.py` work on a clean machine with no network access.
+#
+# Provider/runtime dependencies live in requirements-live.txt.
