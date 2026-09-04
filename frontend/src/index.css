@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-[#0a0a0f] text-white antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'tnum';
+  }
+}
+
+@layer components {
+  .label {
+    @apply text-[10px] font-semibold uppercase tracking-widest text-white/35;
+  }
+  .head {
+    @apply mb-2 text-[11px] font-semibold uppercase tracking-widest text-white/45;
+  }
+  .card {
+    @apply rounded-xl border border-white/10 bg-white/[0.02];
+  }
+}

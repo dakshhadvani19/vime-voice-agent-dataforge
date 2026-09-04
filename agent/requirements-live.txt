@@ -1,0 +1,19 @@
+# Realtime voice path: LiveKit transport + Rime speech + STT/LLM adapters.
+# Versions are the ones this repo was built and type-checked against on 2026-09-04.
+# Rime ships as an official LiveKit plugin, and both are versioned in lockstep, so pin
+# them together — a lone bump of livekit-agents can outrun the plugin.
+livekit-agents==1.7.1
+livekit-plugins-rime==1.7.1
+livekit-plugins-deepgram==1.7.1
+livekit-plugins-openai==1.7.1
+# VAD + neural turn detection. Both pull sizable model assets on first run
+# (`livekit.agents` downloads them); drop these two if you want the smallest install and
+# are happy with endpointing defaults.
+livekit-plugins-silero==1.7.1
+livekit-plugins-turn-detector==1.7.1
+# Only needed by agent/providers.py's direct /ws3 client (word timestamps + `clear`).
+# The LiveKit plugin path does not require it.
+websockets>=12
+# Optional: convenience only. main.py has a 15-line .env loader so python-dotenv is not
+# required to run anything here.
+python-dotenv>=1.0

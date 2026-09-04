@@ -1,0 +1,56 @@
+[project]
+name = "vime-dataforge-agent"
+version = "0.1.0"
+description = "Break My Voice Agent — interruption-safety lab for realtime voice agents (DataForge × Rime)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+# The fencing kernel is stdlib-only on purpose: it must run in CI, in the evaluator and in
+# unit tests with zero provider credentials and zero network access.
+dependencies = []
+
+[project.optional-dependencies]
+live = [
+    "livekit-agents==1.7.1",
+    "livekit-plugins-rime==1.7.1",
+    "livekit-plugins-openai==1.7.1",
+    "livekit-plugins-deepgram==1.7.1",
+    "livekit-plugins-silero==1.7.1",
+    "livekit-plugins-turn-detector==1.7.1",
+]
+# Needed only by agent/providers.py's direct /ws3 client (word timestamps + `clear`).
+rime-ws = ["websockets>=12"]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = []
+
+[tool.pytest.ini_options]
+testpaths = ["agent/tests"]
+pythonpath = ["agent", "evaluation"]
+addopts = "-ra --strict-markers"
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+extend-exclude = ["frontend", ".venv", "node_modules", "evaluation/results"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "ASYNC", "RUF"]
+ignore = [
+    "E501", "B008", "RUF012",
+    # The brief's own typography is part of the deliverable: metric definitions quote "−"
+    # as written in §12, timelines print ✓, and reports use × for case counts.
+    "RUF001", "RUF002", "RUF003",
+    # (str, Enum) is kept over enum.StrEnum so str()/json.dumps() behave identically on
+    # 3.11 and 3.12 and EventKind(value) round-trips for the browser contract.
+    "UP042",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"agent/tests/*" = ["E501", "B011"]
+"evaluation/run_tests.py" = ["E402"]
